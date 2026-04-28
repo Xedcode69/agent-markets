@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import {pool} from '../db/db.js'
 import {sendOTPEmail }from '../services/otp_email_service.js'
 import {getUserById} from '../models/user_model.js'
@@ -18,7 +19,7 @@ const verifyOTP = async (req, res) => {
             return res.status(400).json({ message: 'OTP code has expired' });
         }
 
-        await pool.query('UPDATE users SET is_verified = true WHERE user_id = $1', [userId]);
+        await pool.query('UPDATE users SET is_verified = true WHERE id = $1', [userId]);
 
         await pool.query('DELETE FROM otp_codes WHERE user_id = $1', [userId]);
         
