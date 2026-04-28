@@ -5,16 +5,19 @@ import 'dotenv/config'
 import {createUsersTable, createAgentsTable, createExecutionsTable, createTransactionsTable,
     createRatingsTable } from './migrations/tables.js'
 
-import authRouter from './routes/auth_routes.js'
-import agentRouter from './routes/agent_routes.js'
+import authRoutes from './routes/auth_routes.js'
+import agentRoutes from './routes/agent_routes.js'
+import userRoutes from './routes/user_routes.js'
 import {connectDB} from './db/db.js'
 
-const app = express()
-app.use(cors())
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 
-app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/agents', agentRouter);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/agents', agentRoutes);
+app.use('/api/v1/users', userRoutes);
 
 const startServer = async () => {
     await connectDB();
