@@ -65,13 +65,13 @@ export const loginUser = async(req, res) => {
 
         const existingUser = await getUserByEmail(email);
 
-        if (existingUser) {
+        if (!existingUser) {
             return res.status(400).json({
-                message: 'User already exists'
+                message: 'User does not exist'
             })
         }
 
-        const isPassword = bcrypt.compare(password, existingUser.password);
+        const isPassword = await bcrypt.compare(password, existingUser.password);
 
         if (!isPassword){
             return res.status(400).json({
