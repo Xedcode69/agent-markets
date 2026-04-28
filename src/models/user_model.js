@@ -16,4 +16,23 @@ const getUserById = async(userId) => {
     return result.rows[0];
 }
 
-export {createUser, getUserByEmail, getUserById};
+
+// user related database operations
+
+const getAllUsers = async() => {
+    const result = await pool.query('SELECT * FROM users');
+    return result.rows;
+}
+
+const getSellers = async() => {
+    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['seller']);
+    return result.rows;
+}
+
+const getBuyers = async() => {
+    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['buyer']);
+    return result.rows;
+}
+
+
+export {createUser, getUserByEmail, getUserById, getAllUsers, getSellers, getBuyers};
