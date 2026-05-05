@@ -1,22 +1,19 @@
 import { Router } from "express";
+import {getAllAgentsController, getAgentByIdController, createAgentController, getAgentsByOwnerIdController, updateAgentController, deleteAgentController} from "../controllers/agent_controller.js";
 
 const agentRoutes = Router();
 
 
-agentRoutes.get('/agents', (req, res)=> {
-    res.send("get all agents route");
-})
+agentRoutes.get('/agents', getAllAgentsController);
 
-agentRoutes.post('/agents', (req, res)=> {
-    res.send("create agent route");
-})
+agentRoutes.post('/agents', createAgentController);
 
-agentRoutes.get('/agents/:id', (req, res)=> {
-    res.send("get agent by id route");
-})
+agentRoutes.get('/agents/:id', getAgentByIdController);
 
-agentRoutes.delete('/agents/:id', (req, res)=> {
-    res.send("delete agent by id route");
-})
+agentsRoutes.get('/agents/owner', getAgentsByOwnerIdController);
+
+agentRoutes.put('/agents/:id', updateAgentController);
+
+agentRoutes.delete('/agents/:id', deleteAgentController);
 
 export default agentRoutes;
