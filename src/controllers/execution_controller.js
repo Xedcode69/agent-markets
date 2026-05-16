@@ -1,4 +1,4 @@
-import {executeAndUpdate} from '../services/execution_service.js';
+import {executeAgent} from '../services/execution_service.js';
 
 export const execute = async(req, res)=> {
     try{
