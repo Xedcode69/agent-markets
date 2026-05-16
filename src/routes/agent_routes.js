@@ -6,11 +6,11 @@ const agentRoutes = Router();
 
 agentRoutes.get('/agents', getAllAgentsController);
 
-agentRoutes.post('/agents', createAgentController);
+agentRoutes.post('/agents/new', createAgentController);
 
 agentRoutes.get('/agents/:id', getAgentByIdController);
 
-agentsRoutes.get('/agents/owner', getAgentsByOwnerIdController);
+agentRoutes.get('/agents/owner', getAgentsByOwnerIdController);
 
 agentRoutes.put('/agents/:id', updateAgentController);
 
