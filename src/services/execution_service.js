@@ -22,6 +22,11 @@ const executeAgent = async({agentId, userId, inputData}) => {
         }
 
         const starrTime = Date.now();
+
+        if (!inputData || Object.keys(inputData).length === 0) {
+            throw new Error('Input data is required for agent execution');
+        }
+        
         try{
             const response = axios.post(agent.endpoint_url, inputData, {
                 timeout: 10000
