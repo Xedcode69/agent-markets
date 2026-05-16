@@ -20,4 +20,15 @@ const logTransaction = async(userId, amount, type, status) => {
     return query.rows[0];
 }
 
-export {logExecution, logTransaction};
+
+const getExecutionsByUserId = async(userId) => {
+    const query = await pool.query('SELECT * FROM executions WHERE userId = $1 ORDER BY created_at DESC', [userId]);
+    return query.rows;
+}
+
+const getExecutionsById = async(executionId) => {
+    const query = await pool.query('SELECT * FROM executions WHERE id = $1', [executionId]);
+    return query.rows[0];
+}
+
+export {logExecution, logTransaction, getExecutionsByUserId, getExecutionsById};

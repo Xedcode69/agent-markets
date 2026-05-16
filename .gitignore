@@ -1,3 +1,31 @@
 /node_modules
 
 .env
+.env*
+
+# frontend dependencies
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.*
+/frontend/.yarn/*
+!/frontend/.yarn/patches
+!/frontend/.yarn/plugins
+!/frontend/.yarn/releases
+!/frontend/.yarn/versions
+
+# frontend build and cache output
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/coverage/
+
+# frontend local deploy/tooling state
+/frontend/.vercel
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+# frontend logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.pnpm-debug.log*

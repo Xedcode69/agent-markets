@@ -8,6 +8,7 @@ import {createUsersTable, createAgentsTable, createExecutionsTable, createTransa
 import authRoutes from './routes/auth_routes.js'
 import agentRoutes from './routes/agent_routes.js'
 import userRoutes from './routes/user_routes.js'
+import executionRoutes from './routes/execution_routes.js'
 import {connectDB} from './db/db.js'
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/agents', agentRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/executions', executionRoutes);
 
 const startServer = async () => {
     await connectDB();
