@@ -78,7 +78,7 @@ const updateAgentController = async(req, res) => {
         const owner_id = req.user.id;
         const {name, description, endpoint_url, price} = req.body;
 
-        const updatedAgent = await updateAgent(name, description, endpoint_url, price, agentId, owner_id);
+        const updatedAgent = await updateAgent(agentId, name, description, endpoint_url, price, owner_id);
 
         res.status(200).json({
             message: "Agent updated successfully",

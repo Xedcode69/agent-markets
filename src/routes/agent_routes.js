@@ -8,9 +8,9 @@ agentRoutes.get('/agents', getAllAgentsController);
 
 agentRoutes.post('/agents/new', createAgentController);
 
-agentRoutes.get('/agents/:id', getAgentByIdController);
-
 agentRoutes.get('/agents/owner', getAgentsByOwnerIdController);
+
+agentRoutes.get('/agents/:id', getAgentByIdController);
 
 agentRoutes.put('/agents/:id', updateAgentController);
 
