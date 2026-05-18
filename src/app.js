@@ -29,7 +29,7 @@ const startServer = async () => {
     await createTransactionsTable();
     await createRatingsTable();
 
-    const connection = app.listen(process.env.PORT || 3000, ()=> {
+    const connection = app.listen(process.env.PORT || 5000, ()=> {
     console.log(`Server is running on  http://localhost:${process.env.PORT || 3000}`);
     });
 };
