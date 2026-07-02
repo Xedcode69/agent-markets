@@ -4,23 +4,29 @@ import 'dotenv/config'
 const authMiddleware = (req, res, next)=> {
     try {
         const header = req.headers.authorization;
+        const cookieToken = req.cookies?.auth_token;
+        const headerToken = header?.startsWith('Bearer ') ? header.split(' ')[1] : null;
+        const token = cookieToken || headerToken;
 
-        if (!header || !header.startsWith('Bearer ')){
-            return res.status(403).json("Token not found");
+        if (!token){
+            return res.status(401).json({
+                message: "Token not found"
+            });
         }
-
-        const token = header.split(' ')[1];
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = decoded;
+        req.user = {
+            id: decoded.userId,
+            role: decoded.role
+        };
 
         next();
     }
     catch (error) {
         console.log("authorization failed", error);
-        res.status(500).json({
-            message: "Internal server error"
+        res.status(401).json({
+            message: "Invalid or expired token"
         })
     }
 }

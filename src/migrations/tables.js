@@ -12,10 +12,29 @@ const createUsersTable = async() => {
 
         try {
             await pool.query(query);
+            await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false');
             console.log('Users table created successfully');
         }
         catch (error) {
             console.error('Error creating users table:', error);
+        }
+}
+
+const createOtpCodesTable = async() => {
+    const query = `CREATE TABLE IF NOT EXISTS otp_codes(
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        code TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );`;
+
+        try {
+            await pool.query(query);
+            console.log('OTP codes table created successfully');
+        }
+        catch (error) {
+            console.error('Error creating OTP codes table:', error);
         }
 }
 
@@ -104,6 +123,7 @@ const createRatingsTable = async() => {
 
 export {
     createUsersTable,
+    createOtpCodesTable,
     createAgentsTable,
     createExecutionsTable,
     createTransactionsTable,

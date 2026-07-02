@@ -35,11 +35,12 @@ const updateAgent = async(
     name,
     description,
     endpoint_url,
+    pricing_type,
     price,
     owner_id
 ) => {
-    const query = await pool.query('UPDATE agents SET name = $1, description = $2, endpoint_url = $3, price = $4 WHERE id = $5 AND owner_id = $6 RETURNING *',
-    [name, description, endpoint_url, price, id, owner_id]);
+    const query = await pool.query('UPDATE agents SET name = $1, description = $2, endpoint_url = $3, pricing_type = $4, price = $5 WHERE id = $6 AND owner_id = $7 RETURNING *',
+    [name, description, endpoint_url, pricing_type, price, id, owner_id]);
     return query.rows[0];
 }
 

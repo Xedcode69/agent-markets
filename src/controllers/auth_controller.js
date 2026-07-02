@@ -6,6 +6,22 @@ import {pool} from'../db/db.js'
 import {createUser, getUserByEmail} from '../models/user_model.js'
 import {sendOTPEmail} from '../services/otp_email_service.js'
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+}
+
+const clearCookieOptions = {
+    httpOnly: cookieOptions.httpOnly,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite
+}
+
+const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export const registerUser = async (req, res)=> {
     try {
@@ -14,6 +30,21 @@ export const registerUser = async (req, res)=> {
         if (!email || !password || !role){
             return res.status(400).json({
                 message: 'Email, password and role are required'
+            })
+        }
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                message: 'Enter a valid email address'
+            })
+        }
+        if (password.length < 6) {
+            return res.status(400).json({
+                message: 'Password must be at least 6 characters'
+            })
+        }
+        if (!['buyer', 'seller'].includes(role)) {
+            return res.status(400).json({
+                message: 'Role must be buyer or seller'
             })
         }
         
@@ -34,8 +65,6 @@ export const registerUser = async (req, res)=> {
 
         const otp = generateOTP();
         await pool.query('INSERT INTO otp_codes (user_id, code, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'5 minutes\')', [newUser.id, otp] );
-        
-        console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
 
         await sendOTPEmail(email, otp);
         res.status(200).json({
@@ -60,6 +89,11 @@ export const loginUser = async(req, res) => {
         if (!email || !password){
             return res.status(400).json({
                 message: 'Email and password are required'
+            })
+        }
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                message: 'Enter a valid email address'
             })
         }
 
@@ -92,9 +126,10 @@ export const loginUser = async(req, res) => {
             expiresIn: process.env.JWT_EXPIRES_IN
         });
 
+        res.cookie('auth_token', token, cookieOptions);
+
         res.status(200).json({
             message: "Login successful",
-            token: token,
             user: {
                 id: existingUser.id,
                 email: existingUser.email,
@@ -109,4 +144,12 @@ export const loginUser = async(req, res) => {
             message: 'Internal server error'
         })
     }
+}
+
+export const logoutUser = async(req, res) => {
+    res.clearCookie('auth_token', clearCookieOptions);
+
+    res.status(200).json({
+        message: 'Logout successful'
+    });
 }

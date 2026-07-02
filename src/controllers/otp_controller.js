@@ -7,6 +7,10 @@ const verifyOTP = async (req, res) => {
     try {
         const {userId, code } = req.body;
 
+        if (!userId || !code || !/^\d{6}$/.test(String(code))) {
+            return res.status(400).json({ message: 'User ID and 6 digit OTP code are required' });
+        }
+
         const queryResult = await pool.query('SELECT * from otp_codes WHERE user_id = $1 AND code = $2 ORDER BY created_at DESC LIMIT 1', [userId, code]);
 
         const otpRecord = queryResult.rows[0];
@@ -36,7 +40,10 @@ const resendOTP = async (req, res) => {
     try{
         const { userId } = req.body;
 
-        // Logic for resending OTP
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
         const generateOTP = () => {
             return crypto.randomInt(100000, 900000).toString();
         }

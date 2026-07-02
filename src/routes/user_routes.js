@@ -1,14 +1,20 @@
 import {Router} from 'express'
-import {getAllUsersController, getBuyersController, getSellersController, getUserByIdController} from '../controllers/user_controller.js'
+import {getAllUsersController, getBuyersController, getMeController, getMyTransactionsController, purchaseCreditsController, getSellersController, getUserByIdController} from '../controllers/user_controller.js'
 import authMiddleware from '../middleware/check_authorized.js'
 
 const userRoutes = Router();
 
-userRoutes.get('/all', getAllUsersController);
+userRoutes.get('/me', authMiddleware, getMeController);
 
-userRoutes.get('/seller', getSellersController);
+userRoutes.get('/me/transactions', authMiddleware, getMyTransactionsController);
 
-userRoutes.get('/buyer', getBuyersController);
+userRoutes.post('/me/credits', authMiddleware, purchaseCreditsController);
+
+userRoutes.get('/all', authMiddleware, getAllUsersController);
+
+userRoutes.get('/seller', authMiddleware, getSellersController);
+
+userRoutes.get('/buyer', authMiddleware, getBuyersController);
 
 userRoutes.get('/:id', authMiddleware, getUserByIdController);
 

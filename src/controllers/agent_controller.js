@@ -21,6 +21,9 @@ const getAgentByIdController = async(req, res) => {
         const agentId = req.params.id;
 
         const agent = await getAgentById(agentId);
+        if (!agent) {
+            return res.status(404).json({message: "Agent not found"});
+        }
 
         res.status(200).json({
             message: "Agent retrieved successfully",
@@ -37,6 +40,21 @@ const getAgentByIdController = async(req, res) => {
 const createAgentController  = async(req, res) => {
     try {
         const {name, description, endpoint_url, pricing_type, price} = req.body;
+
+        if (!name || !endpoint_url || !pricing_type || price === undefined) {
+            return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
+        }
+        if (!['per_call', 'subscription'].includes(pricing_type)) {
+            return res.status(400).json({message: "Pricing type must be per_call or subscription"});
+        }
+        if (!Number.isFinite(Number(price)) || Number(price) < 0) {
+            return res.status(400).json({message: "Price must be a non-negative number"});
+        }
+        try {
+            new URL(endpoint_url);
+        } catch {
+            return res.status(400).json({message: "Endpoint URL must be valid"});
+        }
 
         const owner_id = req.user.id;
 
@@ -76,9 +94,27 @@ const updateAgentController = async(req, res) => {
     try {
         const agentId = req.params.id;
         const owner_id = req.user.id;
-        const {name, description, endpoint_url, price} = req.body;
+        const {name, description, endpoint_url, pricing_type, price} = req.body;
 
-        const updatedAgent = await updateAgent(agentId, name, description, endpoint_url, price, owner_id);
+        if (!name || !endpoint_url || !pricing_type || price === undefined) {
+            return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
+        }
+        if (!['per_call', 'subscription'].includes(pricing_type)) {
+            return res.status(400).json({message: "Pricing type must be per_call or subscription"});
+        }
+        if (!Number.isFinite(Number(price)) || Number(price) < 0) {
+            return res.status(400).json({message: "Price must be a non-negative number"});
+        }
+        try {
+            new URL(endpoint_url);
+        } catch {
+            return res.status(400).json({message: "Endpoint URL must be valid"});
+        }
+
+        const updatedAgent = await updateAgent(agentId, name, description, endpoint_url, pricing_type, price, owner_id);
+        if (!updatedAgent) {
+            return res.status(404).json({message: "Agent not found or not owned by you"});
+        }
 
         res.status(200).json({
             message: "Agent updated successfully",
@@ -98,6 +134,9 @@ const deleteAgentController = async(req, res) => {
         const owner_id = req.user.id;
 
         const deletedAgent = await deleteAgent(agentId, owner_id);
+        if (!deletedAgent) {
+            return res.status(404).json({message: "Agent not found or not owned by you"});
+        }
 
         res.status(200).json({
             message: "Agent deleted successfully",

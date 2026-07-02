@@ -12,7 +12,7 @@ const getUserByEmail = async(email) => {
 }
 
 const getUserById = async(userId) => {
-    const result = await pool.query('SELECT * FROM users WHERE id = $1',[userId]);
+    const result = await pool.query('SELECT id, email, role, credits, is_verified, created_at FROM users WHERE id = $1',[userId]);
     return result.rows[0];
 }
 
@@ -20,19 +20,23 @@ const getUserById = async(userId) => {
 // user related database operations
 
 const getAllUsers = async() => {
-    const result = await pool.query('SELECT * FROM users');
+    const result = await pool.query('SELECT id, email, role, credits, is_verified, created_at FROM users');
     return result.rows;
 }
 
 const getSellers = async() => {
-    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['seller']);
+    const result = await pool.query('SELECT id, email, role, credits, is_verified, created_at FROM users WHERE role = $1', ['seller']);
     return result.rows;
 }
 
 const getBuyers = async() => {
-    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['buyer']);
+    const result = await pool.query('SELECT id, email, role, credits, is_verified, created_at FROM users WHERE role = $1', ['buyer']);
     return result.rows;
 }
 
+const addCredits = async(userId, amount, db = pool) => {
+    const result = await db.query('UPDATE users SET credits = credits + $1 WHERE id = $2 RETURNING id, email, role, credits, is_verified, created_at', [amount, userId]);
+    return result.rows[0];
+}
 
-export {createUser, getUserByEmail, getUserById, getAllUsers, getSellers, getBuyers};
+export {createUser, getUserByEmail, getUserById, getAllUsers, getSellers, getBuyers, addCredits};
