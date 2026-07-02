@@ -16,6 +16,7 @@ import {
 import {
   agentDescription,
   formatAgentDate,
+  formatAgentJson,
   formatAgentPrice,
   formatPricingType,
   getAgent,
@@ -93,6 +94,27 @@ export default async function AgentDetailPage({ params }: AgentPageProps) {
                 </div>
               </div>
             </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-md border p-3">
+                <h2 className="text-base font-semibold">Input instructions</h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                  {agent.instructions?.trim() ||
+                    "The seller has not provided run instructions yet."}
+                </p>
+              </div>
+              <div className="rounded-md border p-3">
+                <h2 className="text-base font-semibold">Input schema</h2>
+                {agent.input_schema ? (
+                  <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap text-xs">
+                    {formatAgentJson(agent.input_schema)}
+                  </pre>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    No schema has been provided yet.
+                  </p>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -111,7 +133,15 @@ export default async function AgentDetailPage({ params }: AgentPageProps) {
                 </p>
               </div>
             </div>
-            <ExecutionForm agentId={agent.id} />
+            {agent.example_input ? (
+              <div className="rounded-md border p-3">
+                <p className="text-sm font-medium">Example input</p>
+                <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap text-xs">
+                  {formatAgentJson(agent.example_input)}
+                </pre>
+              </div>
+            ) : null}
+            <ExecutionForm agentId={agent.id} exampleInput={agent.example_input} />
             <Button variant="outline" className="w-full" asChild>
               <Link href="/agents">Back to agents</Link>
             </Button>

@@ -10,10 +10,13 @@ import { formatNumber, runAgent } from "@/lib/backend"
 
 type ExecutionFormProps = {
   agentId: number | string
+  exampleInput?: Record<string, unknown> | null
 }
 
-export function ExecutionForm({ agentId }: ExecutionFormProps) {
-  const [input, setInput] = useState('{\n  "prompt": "Test this agent"\n}')
+export function ExecutionForm({ agentId, exampleInput }: ExecutionFormProps) {
+  const [input, setInput] = useState(
+    JSON.stringify(exampleInput ?? { prompt: "Test this agent" }, null, 2)
+  )
   const [error, setError] = useState("")
   const [result, setResult] = useState<unknown>(null)
   const [meta, setMeta] = useState("")

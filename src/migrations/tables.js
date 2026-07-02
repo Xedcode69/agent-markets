@@ -46,6 +46,9 @@ const createAgentsTable = async() => {
         endpoint_url TEXT NOT NULL,
         pricing_type TEXT CHECK(pricing_type in ('per_call', 'subscription')) NOT NULL,
         price NUMERIC(10, 2) NOT NULL,
+        instructions TEXT,
+        input_schema JSONB,
+        example_input JSONB,
         is_active BOOLEAN DEFAULT true,
         owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -53,6 +56,9 @@ const createAgentsTable = async() => {
 
         try {
             await pool.query(query);
+            await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS instructions TEXT');
+            await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS input_schema JSONB');
+            await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS example_input JSONB');
             console.log('Agents table created successfully');
         }
         catch (error) {

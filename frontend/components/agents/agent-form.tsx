@@ -7,6 +7,7 @@ import Link from "next/link"
 
 import {
   createAgent,
+  formatAgentJson,
   formatPricingType,
   updateAgent,
   type Agent,
@@ -26,6 +27,30 @@ import { Textarea } from "@/components/ui/textarea"
 
 type AgentFormProps = {
   agent?: Agent
+}
+
+function parseOptionalJsonObject(value: FormDataEntryValue | null, label: string) {
+  const text = String(value ?? "").trim()
+
+  if (!text) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(text)
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error(`${label} must be a JSON object.`)
+    }
+
+    return parsed as Record<string, unknown>
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(`${label} must be valid JSON.`)
+    }
+
+    throw err
+  }
 }
 
 export function AgentForm({ agent }: AgentFormProps) {
@@ -50,12 +75,27 @@ export function AgentForm({ agent }: AgentFormProps) {
       return
     }
 
+    let inputSchema: Record<string, unknown> | null = null
+    let exampleInput: Record<string, unknown> | null = null
+
+    try {
+      inputSchema = parseOptionalJsonObject(formData.get("input_schema"), "Input schema")
+      exampleInput = parseOptionalJsonObject(formData.get("example_input"), "Example input")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid input metadata.")
+      setIsSubmitting(false)
+      return
+    }
+
     const input = {
       name: String(formData.get("name") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim(),
       endpoint_url: String(formData.get("endpoint_url") ?? "").trim(),
       pricing_type: pricingType,
       price,
+      instructions: String(formData.get("instructions") ?? "").trim(),
+      input_schema: inputSchema,
+      example_input: exampleInput,
     }
 
     if (!input.name || !input.endpoint_url) {
@@ -112,6 +152,39 @@ export function AgentForm({ agent }: AgentFormProps) {
           defaultValue={agent?.description ?? ""}
           placeholder="Summarize what this agent does for buyers."
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="instructions">Run instructions</Label>
+        <Textarea
+          id="instructions"
+          name="instructions"
+          defaultValue={agent?.instructions ?? ""}
+          placeholder="Explain what inputs buyers should provide and any limits to know before running this agent."
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="input_schema">Input schema JSON</Label>
+          <Textarea
+            id="input_schema"
+            name="input_schema"
+            className="min-h-48 font-mono text-sm"
+            defaultValue={formatAgentJson(agent?.input_schema)}
+            placeholder={'{\n  "type": "object",\n  "required": ["prompt"],\n  "properties": {\n    "prompt": {\n      "type": "string",\n      "description": "The task for the agent"\n    }\n  }\n}'}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="example_input">Example input JSON</Label>
+          <Textarea
+            id="example_input"
+            name="example_input"
+            className="min-h-48 font-mono text-sm"
+            defaultValue={formatAgentJson(agent?.example_input)}
+            placeholder={'{\n  "prompt": "Summarize this contract in plain English"\n}'}
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

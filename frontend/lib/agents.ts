@@ -9,6 +9,9 @@ export type Agent = {
   endpoint_url: string
   pricing_type: PricingType
   price: string | number
+  instructions: string | null
+  input_schema: Record<string, unknown> | null
+  example_input: Record<string, unknown> | null
   is_active: boolean
   owner_id: number
   created_at: string
@@ -20,6 +23,9 @@ export type AgentInput = {
   endpoint_url: string
   pricing_type: PricingType
   price: number
+  instructions: string
+  input_schema: Record<string, unknown> | null
+  example_input: Record<string, unknown> | null
 }
 
 type ApiResponse<T> = {
@@ -115,4 +121,12 @@ export function formatAgentDate(value?: string) {
 
 export function agentDescription(agent: Pick<Agent, "description">) {
   return agent.description?.trim() || "No marketplace description yet."
+}
+
+export function formatAgentJson(value: unknown) {
+  if (!value) {
+    return ""
+  }
+
+  return JSON.stringify(value, null, 2)
 }

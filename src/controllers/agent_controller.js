@@ -1,5 +1,21 @@
 import { getAllAgents, getAgentById, createAgent, getAgentsByOwnerId, updateAgent, deleteAgent} from "../models/agent_model.js";
 
+const isPlainObject = (value) => {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+const validateAgentInputMetadata = (input_schema, example_input) => {
+    if (input_schema !== undefined && input_schema !== null && !isPlainObject(input_schema)) {
+        return 'Input schema must be a JSON object';
+    }
+
+    if (example_input !== undefined && example_input !== null && !isPlainObject(example_input)) {
+        return 'Example input must be a JSON object';
+    }
+
+    return null;
+}
+
 const getAllAgentsController = async(req, res) => {
     try{
         const agents = await getAllAgents();
@@ -39,7 +55,7 @@ const getAgentByIdController = async(req, res) => {
 
 const createAgentController  = async(req, res) => {
     try {
-        const {name, description, endpoint_url, pricing_type, price} = req.body;
+        const {name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input} = req.body;
 
         if (!name || !endpoint_url || !pricing_type || price === undefined) {
             return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
@@ -55,10 +71,24 @@ const createAgentController  = async(req, res) => {
         } catch {
             return res.status(400).json({message: "Endpoint URL must be valid"});
         }
+        const metadataError = validateAgentInputMetadata(input_schema, example_input);
+        if (metadataError) {
+            return res.status(400).json({message: metadataError});
+        }
 
         const owner_id = req.user.id;
 
-        const newAgent = await createAgent(name, description, endpoint_url, pricing_type, price, owner_id);
+        const newAgent = await createAgent(
+            name,
+            description,
+            endpoint_url,
+            pricing_type,
+            price,
+            instructions ?? null,
+            input_schema ?? null,
+            example_input ?? null,
+            owner_id
+        );
 
         res.status(201).json({
             message: "Agent created successfully",
@@ -94,7 +124,7 @@ const updateAgentController = async(req, res) => {
     try {
         const agentId = req.params.id;
         const owner_id = req.user.id;
-        const {name, description, endpoint_url, pricing_type, price} = req.body;
+        const {name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input} = req.body;
 
         if (!name || !endpoint_url || !pricing_type || price === undefined) {
             return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
@@ -110,8 +140,23 @@ const updateAgentController = async(req, res) => {
         } catch {
             return res.status(400).json({message: "Endpoint URL must be valid"});
         }
+        const metadataError = validateAgentInputMetadata(input_schema, example_input);
+        if (metadataError) {
+            return res.status(400).json({message: metadataError});
+        }
 
-        const updatedAgent = await updateAgent(agentId, name, description, endpoint_url, pricing_type, price, owner_id);
+        const updatedAgent = await updateAgent(
+            agentId,
+            name,
+            description,
+            endpoint_url,
+            pricing_type,
+            price,
+            instructions ?? null,
+            input_schema ?? null,
+            example_input ?? null,
+            owner_id
+        );
         if (!updatedAgent) {
             return res.status(404).json({message: "Agent not found or not owned by you"});
         }
