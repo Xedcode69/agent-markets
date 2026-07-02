@@ -39,7 +39,7 @@ export function LoginForm(){
             })
             const user = data.user
 
-            saveAuthSession(data.token, user)
+            saveAuthSession(user)
 
             if (user?.role) {
                 router.push(getDashboardPath(user.role))
@@ -49,7 +49,7 @@ export function LoginForm(){
             const fallbackRole = localStorage.getItem("signupRole") as UserRole | null
             const role = fallbackRole ?? "buyer"
 
-            saveAuthSession(data.token, {
+            saveAuthSession({
                 id: "",
                 email,
                 role,

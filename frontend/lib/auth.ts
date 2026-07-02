@@ -8,7 +8,6 @@ export type AuthUser = {
 
 export type LoginResponse = {
   message: string
-  token: string
   user?: AuthUser
 }
 
@@ -25,9 +24,7 @@ export function getDashboardPath(role: UserRole) {
   return role === "seller" ? "/seller/dashboard" : "/buyer/dashboard"
 }
 
-export function saveAuthSession(token: string, user?: AuthUser) {
-  localStorage.setItem("token", token)
-
+export function saveAuthSession(user?: AuthUser) {
   if (user) {
     localStorage.setItem("user", JSON.stringify(user))
   }
@@ -49,6 +46,5 @@ export function getAuthUser(): AuthUser | null {
 }
 
 export function clearAuthSession() {
-  localStorage.removeItem("token")
   localStorage.removeItem("user")
 }

@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { getAuthUser, getDashboardPath, type UserRole } from "@/lib/auth"
+import { getMe } from "@/lib/backend"
+import {
+  getAuthUser,
+  getDashboardPath,
+  saveAuthSession,
+  type AuthUser,
+  type UserRole,
+} from "@/lib/auth"
 
 type AuthGuardProps = {
   expectedRole?: UserRole
@@ -16,24 +23,31 @@ export function AuthGuard({ expectedRole, children }: AuthGuardProps) {
 
   useEffect(() => {
     let isMounted = true
-    const token = localStorage.getItem("token")
-    const user = getAuthUser()
 
-    if (!token) {
-      router.replace("/login")
-      return
-    }
+    async function checkSession() {
+      let user: AuthUser | null = getAuthUser()
 
-    if (expectedRole && user?.role && user.role !== expectedRole) {
-      router.replace(getDashboardPath(user.role))
-      return
-    }
+      if (!user) {
+        try {
+          user = await getMe()
+          saveAuthSession(user)
+        } catch {
+          router.replace("/login")
+          return
+        }
+      }
 
-    window.setTimeout(() => {
+      if (expectedRole && user.role !== expectedRole) {
+        router.replace(getDashboardPath(user.role))
+        return
+      }
+
       if (isMounted) {
         setIsAllowed(true)
       }
-    }, 0)
+    }
+
+    checkSession()
 
     return () => {
       isMounted = false
