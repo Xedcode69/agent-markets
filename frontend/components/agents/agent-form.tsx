@@ -11,6 +11,7 @@ import {
   formatPricingType,
   updateAgent,
   type Agent,
+  type EndpointMethod,
   type PricingType,
 } from "@/lib/agents"
 import { Button } from "@/components/ui/button"
@@ -58,6 +59,9 @@ export function AgentForm({ agent }: AgentFormProps) {
   const [pricingType, setPricingType] = useState<PricingType>(
     agent?.pricing_type ?? "per_call"
   )
+  const [endpointMethod, setEndpointMethod] = useState<EndpointMethod>(
+    agent?.endpoint_method ?? "POST"
+  )
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -91,6 +95,7 @@ export function AgentForm({ agent }: AgentFormProps) {
       name: String(formData.get("name") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim(),
       endpoint_url: String(formData.get("endpoint_url") ?? "").trim(),
+      endpoint_method: endpointMethod,
       pricing_type: pricingType,
       price,
       instructions: String(formData.get("instructions") ?? "").trim(),
@@ -133,12 +138,30 @@ export function AgentForm({ agent }: AgentFormProps) {
           />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="endpoint_method">Endpoint method</Label>
+          <Select
+            value={endpointMethod}
+            onValueChange={(value) => setEndpointMethod(value as EndpointMethod)}
+          >
+            <SelectTrigger id="endpoint_method" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="POST">POST</SelectItem>
+              <SelectItem value="GET">GET</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="space-y-2">
           <Label htmlFor="endpoint_url">Endpoint URL</Label>
           <Input
             id="endpoint_url"
             name="endpoint_url"
             defaultValue={agent?.endpoint_url}
-            placeholder="https://api.example.com/run"
+            placeholder="https://api.example.com/resource/:id"
             type="url"
           />
         </div>

@@ -1,12 +1,14 @@
 import { apiRequest, authRequest } from "@/lib/api"
 
 export type PricingType = "per_call" | "subscription"
+export type EndpointMethod = "GET" | "POST"
 
 export type Agent = {
   id: number
   name: string
   description: string | null
   endpoint_url: string
+  endpoint_method: EndpointMethod
   pricing_type: PricingType
   price: string | number
   instructions: string | null
@@ -21,6 +23,7 @@ export type AgentInput = {
   name: string
   description: string
   endpoint_url: string
+  endpoint_method: EndpointMethod
   pricing_type: PricingType
   price: number
   instructions: string

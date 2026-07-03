@@ -4,6 +4,7 @@ const createAgent = async(
     name,
     description,
     endpoint_url,
+    endpoint_method,
     pricing_type,
     price,
     instructions,
@@ -12,8 +13,8 @@ const createAgent = async(
     owner_id
 ) => {
     const query = await pool.query(
-        'INSERT INTO agents (name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-        [name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input, owner_id]
+        'INSERT INTO agents (name, description, endpoint_url, endpoint_method, pricing_type, price, instructions, input_schema, example_input, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+        [name, description, endpoint_url, endpoint_method, pricing_type, price, instructions, input_schema, example_input, owner_id]
     );
     return query.rows[0];
 }
@@ -38,6 +39,7 @@ const updateAgent = async(
     name,
     description,
     endpoint_url,
+    endpoint_method,
     pricing_type,
     price,
     instructions,
@@ -45,8 +47,8 @@ const updateAgent = async(
     example_input,
     owner_id
 ) => {
-    const query = await pool.query('UPDATE agents SET name = $1, description = $2, endpoint_url = $3, pricing_type = $4, price = $5, instructions = $6, input_schema = $7, example_input = $8 WHERE id = $9 AND owner_id = $10 RETURNING *',
-    [name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input, id, owner_id]);
+    const query = await pool.query('UPDATE agents SET name = $1, description = $2, endpoint_url = $3, endpoint_method = $4, pricing_type = $5, price = $6, instructions = $7, input_schema = $8, example_input = $9 WHERE id = $10 AND owner_id = $11 RETURNING *',
+    [name, description, endpoint_url, endpoint_method, pricing_type, price, instructions, input_schema, example_input, id, owner_id]);
     return query.rows[0];
 }
 

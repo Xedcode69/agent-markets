@@ -44,6 +44,7 @@ const createAgentsTable = async() => {
         name TEXT NOT NULL,
         description TEXT,
         endpoint_url TEXT NOT NULL,
+        endpoint_method TEXT CHECK(endpoint_method in ('GET', 'POST')) DEFAULT 'POST',
         pricing_type TEXT CHECK(pricing_type in ('per_call', 'subscription')) NOT NULL,
         price NUMERIC(10, 2) NOT NULL,
         instructions TEXT,
@@ -56,6 +57,9 @@ const createAgentsTable = async() => {
 
         try {
             await pool.query(query);
+            await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS endpoint_method TEXT DEFAULT \'POST\'');
+            await pool.query('ALTER TABLE agents DROP CONSTRAINT IF EXISTS agents_endpoint_method_check');
+            await pool.query('ALTER TABLE agents ADD CONSTRAINT agents_endpoint_method_check CHECK(endpoint_method in (\'GET\', \'POST\'))');
             await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS instructions TEXT');
             await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS input_schema JSONB');
             await pool.query('ALTER TABLE agents ADD COLUMN IF NOT EXISTS example_input JSONB');

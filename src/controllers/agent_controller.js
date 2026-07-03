@@ -55,10 +55,13 @@ const getAgentByIdController = async(req, res) => {
 
 const createAgentController  = async(req, res) => {
     try {
-        const {name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input} = req.body;
+        const {name, description, endpoint_url, endpoint_method = 'POST', pricing_type, price, instructions, input_schema, example_input} = req.body;
 
         if (!name || !endpoint_url || !pricing_type || price === undefined) {
             return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
+        }
+        if (!['GET', 'POST'].includes(endpoint_method)) {
+            return res.status(400).json({message: "Endpoint method must be GET or POST"});
         }
         if (!['per_call', 'subscription'].includes(pricing_type)) {
             return res.status(400).json({message: "Pricing type must be per_call or subscription"});
@@ -82,6 +85,7 @@ const createAgentController  = async(req, res) => {
             name,
             description,
             endpoint_url,
+            endpoint_method,
             pricing_type,
             price,
             instructions ?? null,
@@ -124,10 +128,13 @@ const updateAgentController = async(req, res) => {
     try {
         const agentId = req.params.id;
         const owner_id = req.user.id;
-        const {name, description, endpoint_url, pricing_type, price, instructions, input_schema, example_input} = req.body;
+        const {name, description, endpoint_url, endpoint_method = 'POST', pricing_type, price, instructions, input_schema, example_input} = req.body;
 
         if (!name || !endpoint_url || !pricing_type || price === undefined) {
             return res.status(400).json({message: "Name, endpoint URL, pricing type and price are required"});
+        }
+        if (!['GET', 'POST'].includes(endpoint_method)) {
+            return res.status(400).json({message: "Endpoint method must be GET or POST"});
         }
         if (!['per_call', 'subscription'].includes(pricing_type)) {
             return res.status(400).json({message: "Pricing type must be per_call or subscription"});
@@ -150,6 +157,7 @@ const updateAgentController = async(req, res) => {
             name,
             description,
             endpoint_url,
+            endpoint_method,
             pricing_type,
             price,
             instructions ?? null,
