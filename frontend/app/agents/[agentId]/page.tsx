@@ -57,7 +57,7 @@ export default async function AgentDetailPage({ params }: AgentPageProps) {
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-5">
               <div>
                 <p className="text-sm text-muted-foreground">Pricing</p>
                 <p className="mt-1 font-medium">
@@ -75,6 +75,10 @@ export default async function AgentDetailPage({ params }: AgentPageProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Price</p>
                 <p className="mt-1 font-medium">{formatAgentPrice(agent)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Method</p>
+                <p className="mt-1 font-medium">{agent.endpoint_method ?? "POST"}</p>
               </div>
             </div>
             <div>
@@ -141,7 +145,11 @@ export default async function AgentDetailPage({ params }: AgentPageProps) {
                 </pre>
               </div>
             ) : null}
-            <ExecutionForm agentId={agent.id} exampleInput={agent.example_input} />
+            <ExecutionForm
+              agentId={agent.id}
+              inputSchema={agent.input_schema}
+              exampleInput={agent.example_input}
+            />
             <Button variant="outline" className="w-full" asChild>
               <Link href="/agents">Back to agents</Link>
             </Button>

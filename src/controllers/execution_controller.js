@@ -29,6 +29,8 @@ export const execute = async(req, res)=> {
     } catch (error) {
         console.error('Error executing agent:', error);
         const statusCode = ['Agent not found', 'Agent is not active', 'Insufficient credits', 'Invalid agent price'].includes(error.message)
+            || error.message?.startsWith('Invalid execution input:')
+            || error.message?.startsWith('Missing endpoint parameter:')
             ? 400
             : 500;
 

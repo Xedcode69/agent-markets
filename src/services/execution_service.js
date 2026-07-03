@@ -2,7 +2,46 @@ import axios from 'axios';
 import {pool} from '../db/db.js';
 import {getAgentById} from '../models/agent_model.js';
 import {logExecution, logTransaction} from '../models/execution_model.js';
+import {validateJsonSchema} from '../utils/json_schema_validator.js';
 
+const isPlainObject = (value) => {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+const getPathValue = (data, path) => {
+    return path.split('.').reduce((current, key) => {
+        if (!isPlainObject(current)) {
+            return undefined;
+        }
+
+        return current[key];
+    }, data);
+}
+
+const resolveEndpointTemplate = (endpointUrl, data) => {
+    const usedKeys = new Set();
+    const url = endpointUrl.replace(/:([A-Za-z_][A-Za-z0-9_.]*)|\{([A-Za-z_][A-Za-z0-9_.]*)\}/g, (match, colonKey, braceKey) => {
+        const key = colonKey || braceKey;
+        const value = getPathValue(data, key);
+
+        if (value === undefined || value === null || value === '') {
+            throw new Error(`Missing endpoint parameter: ${key}`);
+        }
+
+        usedKeys.add(key);
+        return encodeURIComponent(String(value));
+    });
+
+    return {url, usedKeys};
+}
+
+const buildQueryParams = (data, usedKeys) => {
+    return Object.fromEntries(
+        Object.entries(data).filter(([key, value]) => {
+            return !usedKeys.has(key) && value !== undefined && value !== null && value !== '';
+        })
+    );
+}
 
 const executeAgent = async({agentId, userId, data}) => {
 
@@ -23,6 +62,14 @@ const executeAgent = async({agentId, userId, data}) => {
             throw new Error('Agent is not active');
         }
 
+        const validationErrors = validateJsonSchema(data, agent.input_schema);
+        if (validationErrors.length > 0) {
+            throw new Error(`Invalid execution input: ${validationErrors.join('; ')}`);
+        }
+
+        const endpoint = resolveEndpointTemplate(agent.endpoint_url, data);
+        const endpointMethod = agent.endpoint_method || 'POST';
+
         const price = Number(agent.price);
         if (!Number.isFinite(price) || price < 0) {
             throw new Error('Invalid agent price');
@@ -38,9 +85,14 @@ const executeAgent = async({agentId, userId, data}) => {
         let status;
         
         try{
-            const response = await axios.post(agent.endpoint_url, data, {
-                timeout: 10000
-            })
+            const response = endpointMethod === 'GET'
+                ? await axios.get(endpoint.url, {
+                    params: buildQueryParams(data, endpoint.usedKeys),
+                    timeout: 10000
+                })
+                : await axios.post(endpoint.url, data, {
+                    timeout: 10000
+                })
             output = response.data;
             status = 'completed';
         }
